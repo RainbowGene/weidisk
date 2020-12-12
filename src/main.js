@@ -1,4 +1,5 @@
 import Vue from 'vue';
+import './plugins/axios'
 import App from './App.vue';
 
 import ViewUI from 'view-design';
@@ -11,10 +12,12 @@ Vue.use(ViewUI);
 Vue.use(Viewer);
 
 import router from "./router"
+import store from './store'
 
 Vue.config.productionTip = false
 
 new Vue({
-	router,
-	render: h => h(App),
+    router,
+    store,
+    render: h => h(App)
 }).$mount('#app')

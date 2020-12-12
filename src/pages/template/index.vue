@@ -29,8 +29,7 @@
           ><span class="mx-1">全选</span></Checkbox
         >
       </div>
-    </div>
-    <!-- 列表部分 -->
+    </div>  
     <div class="body_content">
       <media-list
         v-for="(item, index) in list"
