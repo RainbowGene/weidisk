@@ -8,6 +8,9 @@
 export default {
   name: "App",
   components: {},
+  created() {
+    this.$store.dispatch("initUser"); // 获取缓存中的用户信息
+  },
 };
 </script>
 

@@ -26,15 +26,18 @@
             <a href="javascript:void(0)" class="d-flex align-items-center">
               <Avatar
                 class="mr-2"
-                src="https://i.loli.net/2017/08/21/599a521472424.jpg"
+                :src="
+                  user.avatar ||
+                  'https://i.loli.net/2017/08/21/599a521472424.jpg'
+                "
               />
-              管理员
+              {{ user.nickname || user.username }}
               <Icon type="ios-arrow-down"></Icon>
             </a>
             <DropdownMenu slot="list">
               <DropdownItem>个人资料</DropdownItem>
               <DropdownItem>修改密码</DropdownItem>
-              <DropdownItem>安全退出</DropdownItem>
+              <DropdownItem @click.native="logout">安全退出</DropdownItem>
             </DropdownMenu>
           </Dropdown>
         </div>
@@ -104,6 +107,7 @@
 </template>
 
 <script>
+import { mapState } from "vuex";
 export default {
   data() {
     return {
@@ -124,6 +128,12 @@ export default {
       topActive: 0,
     };
   },
+  computed: {
+    ...mapState({
+      user: (state) => state.user || {},
+    }),
+  },
+  mounted() {},
   methods: {
     // 监听顶部导航改变
     handleSelect(e) {
@@ -132,6 +142,23 @@ export default {
     // 监听侧边导航改变
     handleSliderSelect(e) {
       console.log(e);
+    },
+    // 退出登录
+    logout() {
+      this.axios
+        .post("/api/logout", {}, { token: true })
+        .then((res) => {
+          // 清除登录状态和本地存储
+          this.$store.dispatch("logout");
+          this.$Message.success("退出成功");
+          this.$router.push({ name: "login" });
+        })
+        .catch((res) => {
+          // 清除登录状态和本地存储
+          this.$store.dispatch("logout");
+          this.$Message.success("退出成功");
+          this.$router.push({ name: "login" });
+        });
     },
   },
 };

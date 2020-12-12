@@ -3,7 +3,7 @@ import Router from "vue-router"
 
 Vue.use(Router)
 
-export default new Router({
+const router = new Router({
   routes: [{
     path: "/login",
     name: 'login',
@@ -21,3 +21,24 @@ export default new Router({
     }]
   }]
 })
+
+// 路由守卫：权限验证
+router.beforeEach((to, from, next) => {
+  // 获取token
+  let token = window.localStorage.getItem('token')
+  let user = window.localStorage.getItem('user')
+  if (token && user) { // 已登录
+    if (to.path === '/login') {
+      Vue.prototype.$Message.error('请勿重复登录')
+      return next({ name: from.name ? from.name : 'index' })
+    }
+    next()
+  } else { // 未登录
+    if (to.path === '/login') return next()
+    Vue.prototype.$Message.error('请先登录')
+    next({ name: 'login' })
+  }
+})
+
+export default router
+

@@ -1,5 +1,5 @@
 <template>
-  <div class="border-bottom px-3 py-2 file-list">
+  <div class="border-bottom px-3 py-2 file-list" @dblclick.stop="clickEvent">
     <Row>
       <Col span="12" class="d-flex align-items-center">
         <Checkbox
@@ -9,7 +9,7 @@
           @on-change="onChange"
         ></Checkbox>
         <i class="iconfont mr-3" :class="iconClass"></i>
-        <small class="icon_cp" @click="clickEvent()">{{ item.name }}</small>
+        <small class="icon_cp">{{ item.name }}</small>
 
         <div class="ml-auto item_hide">
           <Tooltip content="分享" placement="bottom">
@@ -18,14 +18,16 @@
               color="#2db7f5"
               size="18"
               class="icon_cp"
+              @click="share"
             ></Icon
           ></Tooltip>
-          <Tooltip content="下载" placement="bottom">
+          <Tooltip v-if="!item.isdir" content="下载" placement="bottom">
             <Icon
               type="md-cloud-download"
               color="#2db7f5"
               size="18"
               class="mx-3 icon_cp"
+              @click="download"
             ></Icon>
           </Tooltip>
           <Dropdown>
@@ -49,7 +51,7 @@
         span="6"
         style="height: 42px"
         class="d-flex align-items-center text-secondary"
-        >{{ item.create_time }}</Col
+        >{{ item.created_time }}</Col
       >
     </Row>
   </div>
@@ -95,17 +97,25 @@ export default {
   },
 
   methods: {
+    clickEvent() {
+      console.log(this.item);
+      if (this.item.type === "image") {
+        this.$emit("on-event", {
+          type: "image",
+          url: this.item.url,
+        });
+      } else {
+        this.$emit("on-event", {
+          type: this.item.type,
+          item: this.item,
+        });
+      }
+    },
     deleteItem() {
-      this.$Modal.confirm({
-        title: "提示",
-        content: "是否删除文件？",
-        onOk: () => {
-          this.$emit("on-event", {
-            type: "delete",
-            item: this.item,
-            index: this.index,
-          });
-        },
+      this.$emit("on-event", {
+        type: "delete",
+        item: this.item,
+        index: this.index,
       });
     },
     onChange(e) {
@@ -121,13 +131,17 @@ export default {
         index: this.index,
       });
     },
-    clickEvent() {
-      if (this.item.type === "image") {
-        this.$emit("on-event", {
-          type: "image",
-          url: this.item.url,
-        });
-      }
+    download() {
+      this.$emit("on-event", {
+        type: "download",
+        item: this.item,
+      });
+    },
+    share() {
+      this.$emit("on-event", {
+        type: "share",
+        id: this.item.id,
+      });
     },
   },
 };

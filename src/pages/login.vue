@@ -21,14 +21,25 @@
             type="password"
           />
         </FormItem>
+        <FormItem v-if="type === 'reg'" prop="repassword">
+          <Input
+            v-model="formItem.repassword"
+            placeholder="请输入确认密码"
+            type="password"
+          />
+        </FormItem>
         <div class="d-flex align-items-center mb-2 ml-1">
-          <Checkbox v-model="formItem.remember">自动登录</Checkbox>
+          <!-- <Checkbox v-model="formItem.remember">自动登录</Checkbox> -->
           <a href="#" class="small ml-auto">忘记密码</a>
           <span class="mx-1">|</span>
-          <a href="#" class="small">注册账户</a>
+          <a href="#" class="small" @click="changeType">{{
+            type === "login" ? "注册账户" : "去登录"
+          }}</a>
         </div>
         <FormItem>
-          <Button type="primary" long @click="submit">登 录</Button>
+          <Button type="primary" :loading="loading" long @click="submit">{{
+            type === "login" ? "登录" : "注册"
+          }}</Button>
         </FormItem>
       </Form>
     </div>
@@ -40,10 +51,12 @@ export default {
   data() {
     return {
       formItem: {
-        username: "13026636499",
+        username: "GeneClycle",
         password: "123456",
-        remember: false,
+        repassword: "",
       },
+      loading: false,
+      type: "login",
       rules: {
         username: [
           { required: true, message: "请输入用户名", trigger: "blur" },
@@ -51,6 +64,10 @@ export default {
         ],
         password: [
           { required: true, message: "请输入密码", trigger: "blur" },
+          // { type: "string", min: 6, message: "密码长度不能小于6位" },
+        ],
+        repassword: [
+          { required: true, message: "请输入确认密码", trigger: "blur" },
           // { type: "string", min: 6, message: "密码长度不能小于6位" },
         ],
       },
@@ -61,8 +78,32 @@ export default {
       this.$refs.form.validate((val) => {
         if (!val) return;
         // 提交表单
-        console.log(111);
+        let text = this.type === "login" ? "登录" : "注册";
+        this.loading = true;
+        this.axios
+          .post(`/api/${this.type}`, this.formItem)
+          .then((res) => {
+            this.loading = false;
+            if (this.type === "reg") {
+              this.type = "login";
+            } else {
+              // 存储登录状态
+              this.$store.dispatch("login", res.data);
+              console.log(res);
+              // 跳转
+              this.$router.push({ name: "layout" });
+            }
+            this.$Message.success(text + "成功");
+          })
+          .catch((err) => {
+            // this.$Message.error(err.response.data.data);
+            this.loading = false;
+          });
       });
+    },
+    // 切换登录/注册
+    changeType() {
+      this.type = this.type === "login" ? "reg" : "login";
     },
   },
 };
